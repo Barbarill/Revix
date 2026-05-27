@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  MECHANIC
+}
+
+enum Category {
+  MOTOR
+  BODYWORK
+  ELECTRONICS
+  BRAKES
+  SUSPENSION
+}
+
+model User {
+  id              String     @id @default(uuid())
+  email           String     @unique
+  password_hash   String
+  username        String     @unique
+  role            Role       @default(USER)
+  bio             String?
+  avatar          String?
+  garage_name     String?
+  garage_address  String?
+  maps_url        String?
+  website         String?
+  is_verified     Boolean    @default(false)
+  created_at      DateTime   @default(now())
+
+  problems        Problem[]
+  solutions       Solution[]
+  confirms        Confirm[]
+  likes           Like[]
+}
+
+model Car {
+  id          String    @id @default(uuid())
+  brand       String
+  model       String
+  year_from   Int
+  year_to     Int?
+  fuel        String
+  horsepower  Int?
+  created_at  DateTime  @default(now())
+
+  problems    Problem[]
+}
+
+model Problem {
+  id            String    @id @default(uuid())
+  car_id        String
+  user_id       String
+  title         String
+  description   String
+  category      Category
+  confirm_count Int       @default(0)
+  is_official   Boolean   @default(false)
+  created_at    DateTime  @default(now())
+
+  car           Car       @relation(fields: [car_id], references: [id])
+  user          User      @relation(fields: [user_id], references: [id])
+  solutions     Solution[]
+  confirms      Confirm[]
+}
+
+model Solution {
+  id          String    @id @default(uuid())
+  problem_id  String
+  user_id     String
+  body        String
+  shop_url    String?
+  likes_count Int       @default(0)
+  created_at  DateTime  @default(now())
+
+  problem     Problem   @relation(fields: [problem_id], references: [id])
+  user        User      @relation(fields: [user_id], references: [id])
+  likes       Like[]
+}
+
+model Confirm {
+  user_id     String
+  problem_id  String
+  created_at  DateTime  @default(now())
+
+  user        User      @relation(fields: [user_id], references: [id])
+  problem     Problem   @relation(fields: [problem_id], references: [id])
+
+  @@id([user_id, problem_id])
+}
+
+model Like {
+  user_id     String
+  solution_id String
+  created_at  DateTime  @default(now())
+
+  user        User      @relation(fields: [user_id], references: [id])
+  solution    Solution  @relation(fields: [solution_id], references: [id])
+
+  @@id([user_id, solution_id])
+}
