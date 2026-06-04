@@ -54,4 +54,25 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 })
 
+// GET /api/cars/:id/problems
+router.get('/:id/problems', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const problems = await prisma.problem.findMany({
+      where: { car_id: String(req.params.id) },
+      orderBy: { confirm_count: 'desc' },
+      include: {
+        user: { select: { id: true, username: true, role: true } },
+      },
+    })
+
+    const official = problems.filter(p => p.is_official)
+    const pending = problems.filter(p => !p.is_official)
+
+    res.json({ official, pending })
+  } catch (err) {
+    console.error('CAR PROBLEMS ERROR:', err)
+    res.status(500).json({ error: 'Errore interno del server' })
+  }
+})
+
 export default router

@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
+import ProblemForm from '../components/ProblemForm'
+import ProblemList from '../components/ProblemList'
 
 interface Car {
   id: string
@@ -10,22 +13,44 @@ interface Car {
   year_to: number | null
   fuel: string
   horsepower: number | null
-  created_at: string
   _count: { problems: number }
+}
+
+interface Problem {
+  id: string
+  title: string
+  description: string
+  category: string
+  confirm_count: number
+  is_official: boolean
+  created_at: string
+  user: { id: string; username: string; role: string }
+}
+
+interface ProblemsResponse {
+  official: Problem[]
+  pending: Problem[]
 }
 
 export default function CarDetail() {
   const { id } = useParams()
+  const [showForm, setShowForm] = useState(false)
 
-  const { data: car, isLoading } = useQuery<Car>({
+  // Legge l'utente dal localStorage per sapere se è loggato
+  const storedUser = localStorage.getItem('user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+
+  const { data: car, isLoading: carLoading } = useQuery<Car>({
     queryKey: ['car', id],
-    queryFn: async () => {
-      const res = await api.get(`/cars/${id}`)
-      return res.data
-    },
+    queryFn: async () => (await api.get(`/cars/${id}`)).data,
   })
 
-  if (isLoading) return <p style={{ color: '#888', margin: 40 }}>Caricamento...</p>
+  const { data: problems, isLoading: problemsLoading } = useQuery<ProblemsResponse>({
+    queryKey: ['problems', id],
+    queryFn: async () => (await api.get(`/cars/${id}/problems`)).data,
+  })
+
+  if (carLoading) return <p style={{ color: '#888', margin: 40 }}>Caricamento...</p>
   if (!car) return <p style={{ color: '#888', margin: 40 }}>Auto non trovata.</p>
 
   const years = car.year_to ? `${car.year_from} – ${car.year_to}` : `${car.year_from} – oggi`
@@ -36,6 +61,7 @@ export default function CarDetail() {
         ← Torna alla ricerca
       </Link>
 
+      {/* Scheda auto */}
       <div style={{ margin: '24px 0', padding: '32px', background: '#1a1a1a', borderRadius: 16, border: '1px solid #2a2a2a' }}>
         <h1 style={{ margin: 0, fontSize: 32, color: '#fff' }}>{car.brand} {car.model}</h1>
         <p style={{ color: '#888', margin: '8px 0 0' }}>{years}</p>
@@ -47,11 +73,33 @@ export default function CarDetail() {
         </div>
       </div>
 
-      <div style={{ padding: '24px', background: '#1a1a1a', borderRadius: 16, border: '1px solid #2a2a2a' }}>
-        <p style={{ color: '#666', margin: 0, textAlign: 'center' }}>
-          I problemi arriveranno nel Passo 2.1 🔧
-        </p>
+      {/* Sezione problemi */}
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0, color: '#fff' }}>Problemi</h2>
+        {user ? (
+          <button
+            onClick={() => setShowForm(v => !v)}
+            style={{ padding: '10px 20px', borderRadius: 8, background: showForm ? '#333' : '#e63', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+          >
+            {showForm ? 'Annulla' : '+ Segnala problema'}
+          </button>
+        ) : (
+          <Link to="/login" style={{ color: '#e63', fontSize: 14 }}>
+            Accedi per segnalare
+          </Link>
+        )}
       </div>
+
+      {showForm && <ProblemForm carId={car.id} onClose={() => setShowForm(false)} />}
+
+      {problemsLoading ? (
+        <p style={{ color: '#888' }}>Caricamento problemi...</p>
+      ) : (
+        <ProblemList
+          official={problems?.official ?? []}
+          pending={problems?.pending ?? []}
+        />
+      )}
     </div>
   )
 }
