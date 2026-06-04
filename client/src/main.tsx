@@ -6,6 +6,8 @@ import './index.css'
 import App from './App.tsx'
 import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
+import Home from './pages/Home.tsx'
+import CarDetail from './pages/CarDetail.tsx'
 
 const queryClient = new QueryClient()
 
@@ -14,7 +16,8 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<App />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/cars/:id" element={<CarDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>

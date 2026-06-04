@@ -4,6 +4,7 @@ dotenv.config()
 import express from 'express'
 import cors from 'cors'
 import authRoutes from './routes/auth'
+import carRoutes from './routes/cars'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -16,6 +17,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/cars', carRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server in ascolto su http://localhost:${PORT}`)
