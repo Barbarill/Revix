@@ -5,9 +5,6 @@ import { z } from 'zod'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { authMiddleware, AuthRequest } from '../middleware/authMiddleware'
-import dotenv from 'dotenv'
-
-dotenv.config()
 
 const router = Router()
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
@@ -52,27 +49,27 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     const user = await prisma.user.create({
       data: {
-        email,
-        password_hash,
-        username,
-        role,
-        garage_name: garage_name ?? null,
-        garage_address: garage_address ?? null,
-        maps_url: maps_url ?? null,
-        website: website ?? null,
-      },
+              email,
+              password_hash,
+              username,
+              role,
+              garage_name: garage_name ?? null,
+              garage_address: garage_address ?? null,
+              maps_url: maps_url ?? null,
+              website: website ?? null,
+            },
     })
 
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_SECRET!,
+      process.env.JWT_SECRET as string,
       { expiresIn: '7d' }
     )
 
     res.status(201).json({ token, user: { id: user.id, email: user.email, username: user.username, role: user.role } })
   } catch (err) {
-    console.error('REGISTER ERROR:', err)
-    res.status(500).json({ error: 'Errore interno del server' })
+      console.error('REGISTER ERROR:', err)
+      res.status(500).json({ error: 'Errore interno del server' })
   }
 })
 
@@ -101,14 +98,14 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_SECRET!,
+      process.env.JWT_SECRET as string,
       { expiresIn: '7d' }
     )
 
     res.json({ token, user: { id: user.id, email: user.email, username: user.username, role: user.role } })
   } catch (err) {
-    console.error('LOGIN ERROR:', err)
-    res.status(500).json({ error: 'Errore interno del server' })
+      console.error('REGISTER ERROR:', err)
+      res.status(500).json({ error: 'Errore interno del server' })
   }
 })
 
@@ -117,11 +114,9 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response): Promi
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId! },
-      select: {
-        id: true, email: true, username: true, role: true, bio: true, avatar: true,
-        garage_name: true, garage_address: true, maps_url: true, website: true,
-        is_verified: true, created_at: true
-      },
+      select: { id: true, email: true, username: true, role: true, bio: true, avatar: true,
+                garage_name: true, garage_address: true, maps_url: true, website: true,
+                is_verified: true, created_at: true },
     })
     if (!user) {
       res.status(404).json({ error: 'Utente non trovato' })
@@ -129,8 +124,8 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response): Promi
     }
     res.json(user)
   } catch (err) {
-    console.error('ME ERROR:', err)
-    res.status(500).json({ error: 'Errore interno del server' })
+      console.error('REGISTER ERROR:', err)
+      res.status(500).json({ error: 'Errore interno del server' })
   }
 })
 
