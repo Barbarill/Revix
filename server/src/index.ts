@@ -6,6 +6,7 @@ import cors from 'cors'
 import authRoutes from './routes/auth'
 import carRoutes from './routes/cars'
 import problemRoutes from './routes/problems'
+import solutionRoutes from './routes/solutions'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/cars', carRoutes)
 app.use('/api/problems', problemRoutes)
+app.use('/api/solutions', solutionRoutes) 
 
 app.listen(PORT, () => {
   console.log(`Server in ascolto su http://localhost:${PORT}`)

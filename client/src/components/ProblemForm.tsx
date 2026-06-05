@@ -10,10 +10,7 @@ const CATEGORIES = [
   { value: 'BODYWORK', label: '🚗 Carrozzeria' },
 ]
 
-interface Props {
-  carId: string
-  onClose: () => void
-}
+interface Props { carId: string; onClose: () => void }
 
 export default function ProblemForm({ carId, onClose }: Props) {
   const queryClient = useQueryClient()
@@ -22,90 +19,70 @@ export default function ProblemForm({ carId, onClose }: Props) {
   const [category, setCategory] = useState('MOTOR')
 
   const { mutate, isPending, isError } = useMutation({
-    mutationFn: async () => {
-      await api.post('/problems', { car_id: carId, title, description, category })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['problems', carId] })
-      onClose()
-    },
+    mutationFn: async () => api.post('/problems', { car_id: carId, title, description, category }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['problems', carId] }); onClose() },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    mutate()
+  const inputStyle = {
+    width: '100%', padding: '7px 10px',
+    borderRadius: 'var(--border-radius-md)',
+    border: '0.5px solid var(--color-border-secondary)',
+    background: 'var(--color-background-primary)',
+    fontSize: 13, color: 'var(--color-text-primary)',
+    outline: 'none', boxSizing: 'border-box' as const,
   }
+
+  const labelStyle = { display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 5, fontWeight: 500 }
 
   return (
     <div style={{
-      background: '#1a1a1a', border: '1px solid #e63',
-      borderRadius: 16, padding: 24, marginBottom: 24
+      background: 'var(--color-background-primary)',
+      border: '0.5px solid var(--color-border-secondary)',
+      borderRadius: 'var(--border-radius-lg)', padding: 16, marginBottom: 14,
     }}>
-      <h3 style={{ margin: '0 0 20px', color: '#fff' }}>Segnala un problema</h3>
+      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 14 }}>Segnala un problema</div>
 
       {isError && (
-        <div style={{ background: '#fee', color: '#c00', padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
+        <div style={{ fontSize: 12, color: '#c00', background: '#fee', padding: '8px 12px', borderRadius: 'var(--border-radius-md)', marginBottom: 12 }}>
           Errore durante l'invio. Riprova.
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
-          <label style={{ display: 'block', marginBottom: 6, color: '#aaa', fontSize: 13 }}>Categoria</label>
-          <select
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #333', background: '#111', color: '#fff' }}
-          >
-            {CATEGORIES.map(c => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
+          <label style={labelStyle}>Categoria</label>
+          <select value={category} onChange={e => setCategory(e.target.value)} style={inputStyle}>
+            {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
-
         <div>
-          <label style={{ display: 'block', marginBottom: 6, color: '#aaa', fontSize: 13 }}>Titolo</label>
-          <input
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            required
-            minLength={5}
-            placeholder="Es. Rumore strano al motore a freddo"
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #333', background: '#111', color: '#fff', boxSizing: 'border-box' }}
-          />
+          <label style={labelStyle}>Titolo</label>
+          <input type="text" value={title} onChange={e => setTitle(e.target.value)} required minLength={5}
+            placeholder="Es. Rumore strano al motore a freddo" style={inputStyle} />
         </div>
-
         <div>
-          <label style={{ display: 'block', marginBottom: 6, color: '#aaa', fontSize: 13 }}>Descrizione</label>
-          <textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            required
-            minLength={10}
-            rows={4}
-            placeholder="Descrivi il problema nel dettaglio..."
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #333', background: '#111', color: '#fff', resize: 'vertical', boxSizing: 'border-box' }}
-          />
+          <label style={labelStyle}>Descrizione</label>
+          <textarea value={description} onChange={e => setDescription(e.target.value)} required minLength={10}
+            rows={3} placeholder="Descrivi il problema nel dettaglio..."
+            style={{ ...inputStyle, resize: 'vertical' }} />
         </div>
-
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button
-            type="submit"
-            disabled={isPending}
-            style={{ flex: 1, padding: '11px', borderRadius: 8, background: '#e63', color: '#fff', border: 'none', fontWeight: 600, cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.7 : 1 }}
-          >
-            {isPending ? 'Invio in corso...' : 'Segnala problema'}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => mutate()} disabled={isPending} style={{
+            flex: 1, padding: '7px', borderRadius: 'var(--border-radius-md)',
+            background: 'var(--color-accent)', color: '#fff', border: 'none',
+            fontSize: 13, fontWeight: 500, cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.7 : 1
+          }}>
+            {isPending ? 'Invio...' : 'Segnala'}
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ padding: '11px 20px', borderRadius: 8, background: '#222', color: '#aaa', border: '1px solid #333', cursor: 'pointer' }}
-          >
+          <button onClick={onClose} style={{
+            padding: '7px 16px', borderRadius: 'var(--border-radius-md)',
+            background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)',
+            border: '0.5px solid var(--color-border-secondary)', fontSize: 13, cursor: 'pointer'
+          }}>
             Annulla
           </button>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

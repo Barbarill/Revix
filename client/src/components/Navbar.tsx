@@ -13,34 +13,59 @@ export default function Navbar() {
 
   return (
     <nav style={{
-      background: '#111', borderBottom: '1px solid #222',
-      padding: '0 24px', height: 56,
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+      display: 'flex', alignItems: 'center', gap: 16,
+      padding: '12px 20px',
+      background: 'var(--color-background-primary)',
+      borderBottom: '0.5px solid var(--color-border-tertiary)',
+      position: 'sticky', top: 0, zIndex: 100,
     }}>
-      <Link to="/" style={{ color: '#e63', fontWeight: 800, fontSize: 20, textDecoration: 'none' }}>
-        Revix
+      <Link to="/" style={{ fontSize: 17, fontWeight: 500, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span>🔧</span><span>Re<span style={{ color: 'var(--color-accent)' }}>vix</span></span>
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
         {user ? (
           <>
-            <span style={{ color: '#888', fontSize: 14 }}>
+            <span style={{
+              fontSize: 13, color: 'var(--color-text-secondary)',
+              padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 6
+            }}>
               {user.username}
               {user.role === 'MECHANIC' && (
-                <span style={{ color: '#e63', marginLeft: 6, fontSize: 11, fontWeight: 600 }}>🔧 MECCANICO</span>
+                <span style={{ fontSize: 10, background: 'var(--color-purple-light)', color: 'var(--color-purple)', padding: '1px 6px', borderRadius: 10, fontWeight: 500 }}>
+                  Meccanico
+                </span>
               )}
             </span>
-            <button
-              onClick={logout}
-              style={{ padding: '6px 14px', borderRadius: 8, background: '#222', color: '#aaa', border: '1px solid #333', cursor: 'pointer', fontSize: 13 }}
-            >
-              Logout
+            <button onClick={logout} style={{
+              fontSize: 13, padding: '5px 14px',
+              borderRadius: 'var(--border-radius-md)',
+              border: '0.5px solid var(--color-border-secondary)',
+              background: 'var(--color-background-primary)',
+              color: 'var(--color-text-primary)', cursor: 'pointer'
+            }}>
+              Esci
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" style={{ color: '#aaa', fontSize: 14, textDecoration: 'none' }}>Accedi</Link>
-            <Link to="/register" style={{ padding: '6px 14px', borderRadius: 8, background: '#e63', color: '#fff', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>Registrati</Link>
+            <Link to="/login" style={{
+              fontSize: 13, padding: '5px 14px',
+              borderRadius: 'var(--border-radius-md)',
+              border: '0.5px solid var(--color-border-secondary)',
+              background: 'var(--color-background-primary)',
+              color: 'var(--color-text-primary)'
+            }}>
+              Accedi
+            </Link>
+            <Link to="/register" style={{
+              fontSize: 13, padding: '5px 14px',
+              borderRadius: 'var(--border-radius-md)',
+              background: 'var(--color-accent)', color: '#fff',
+              border: '0.5px solid var(--color-accent)', marginLeft: 6
+            }}>
+              Registrati
+            </Link>
           </>
         )}
       </div>
