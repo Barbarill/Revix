@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
 import CarCard from '../components/CarCard'
+import CommunityFeed from '../components/CommunityFeed'
 
 interface Car {
   id: string
@@ -54,22 +55,21 @@ export default function Home() {
               borderRadius: 'var(--border-radius-md)',
               border: '0.5px solid var(--color-border-secondary)',
               background: 'var(--color-background-primary)',
-              fontSize: 14, color: 'var(--color-text-primary)',
-              outline: 'none',
+              fontSize: 14, color: 'var(--color-text-primary)', outline: 'none',
             }}
           />
           <button type="submit" style={{
             padding: '8px 16px',
             borderRadius: 'var(--border-radius-md)',
             background: 'var(--color-accent)', color: '#fff',
-            border: 'none', fontSize: 13, cursor: 'pointer', fontWeight: 500
+            border: 'none', fontSize: 13, cursor: 'pointer', fontWeight: 500,
           }}>
             Cerca
           </button>
         </form>
       </div>
 
-      {/* Risultati */}
+      {/* Lista auto */}
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '16px 20px' }}>
         {isLoading && (
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>Caricamento...</p>
@@ -81,6 +81,9 @@ export default function Home() {
           {cars?.map(car => <CarCard key={car.id} car={car} />)}
         </div>
       </div>
+
+      {/* Feed community */}
+      <CommunityFeed />
     </div>
   )
 }
