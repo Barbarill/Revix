@@ -23,6 +23,7 @@ interface Problem {
   category: string
   confirm_count: number
   is_official: boolean
+  confirmedByMe: boolean
   created_at: string
   user: { id: string; username: string; role: string }
 }
@@ -46,8 +47,11 @@ export default function CarDetail() {
   })
 
   const { data: problems, isLoading: problemsLoading } = useQuery<ProblemsResponse>({
-    queryKey: ['problems', id],
-    queryFn: async () => (await api.get(`/cars/${id}/problems`)).data,
+    queryKey: ['problems', id, user?.id],
+    queryFn: async () => {
+      const params = user ? { userId: user.id } : {}
+      return (await api.get(`/cars/${id}/problems`, { params })).data
+    },
   })
 
   if (carLoading) return <p style={{ color: '#888', margin: 40 }}>Caricamento...</p>
@@ -98,6 +102,7 @@ export default function CarDetail() {
         <ProblemList
           official={problems?.official ?? []}
           pending={problems?.pending ?? []}
+          carId={car.id}
         />
       )}
     </div>

@@ -8,6 +8,7 @@ import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
 import Home from './pages/Home.tsx'
 import CarDetail from './pages/CarDetail.tsx'
+import Navbar from './components/Navbar.tsx'
 
 const queryClient = new QueryClient()
 
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/cars/:id" element={<CarDetail />} />
