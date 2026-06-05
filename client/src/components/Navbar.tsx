@@ -23,26 +23,29 @@ export default function Navbar() {
         <span>🔧</span><span>Re<span style={{ color: 'var(--color-accent)' }}>vix</span></span>
       </Link>
 
-      <div style={{ display: 'flex', gap: 2, marginLeft: 'auto' }}>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginLeft: 'auto' }}>
         {user ? (
           <>
-            <span style={{
-              fontSize: 13, color: 'var(--color-text-secondary)',
-              padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 6
-            }}>
-              {user.username}
-              {user.role === 'MECHANIC' && (
-                <span style={{ fontSize: 10, background: 'var(--color-purple-light)', color: 'var(--color-purple)', padding: '1px 6px', borderRadius: 10, fontWeight: 500 }}>
-                  Meccanico
-                </span>
-              )}
-            </span>
+            <Link to={`/profile/${user.id}`} style={{
+                fontSize: 13, color: 'var(--color-text-primary)',
+                padding: '5px 10px', borderRadius: 'var(--border-radius-md)',
+                display: 'flex', alignItems: 'center', gap: 6,
+                border: '0.5px solid var(--color-border-secondary)',
+                background: 'var(--color-background-secondary)',
+                }}>
+                👤 {user.username}
+                {user.role === 'MECHANIC' && (
+                    <span style={{ fontSize: 10, background: 'var(--color-purple-light)', color: 'var(--color-purple)', padding: '1px 6px', borderRadius: 10, fontWeight: 500 }}>
+                    Meccanico
+                    </span>
+                )}
+                </Link>
             <button onClick={logout} style={{
               fontSize: 13, padding: '5px 14px',
               borderRadius: 'var(--border-radius-md)',
               border: '0.5px solid var(--color-border-secondary)',
               background: 'var(--color-background-primary)',
-              color: 'var(--color-text-primary)', cursor: 'pointer'
+              color: 'var(--color-text-primary)', cursor: 'pointer',
             }}>
               Esci
             </button>
@@ -54,7 +57,7 @@ export default function Navbar() {
               borderRadius: 'var(--border-radius-md)',
               border: '0.5px solid var(--color-border-secondary)',
               background: 'var(--color-background-primary)',
-              color: 'var(--color-text-primary)'
+              color: 'var(--color-text-primary)',
             }}>
               Accedi
             </Link>
@@ -62,7 +65,7 @@ export default function Navbar() {
               fontSize: 13, padding: '5px 14px',
               borderRadius: 'var(--border-radius-md)',
               background: 'var(--color-accent)', color: '#fff',
-              border: '0.5px solid var(--color-accent)', marginLeft: 6
+              border: '0.5px solid var(--color-accent)',
             }}>
               Registrati
             </Link>

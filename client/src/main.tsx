@@ -9,6 +9,8 @@ import Register from './pages/Register.tsx'
 import Home from './pages/Home.tsx'
 import CarDetail from './pages/CarDetail.tsx'
 import Navbar from './components/Navbar.tsx'
+import Profile from './pages/Profile.tsx'
+import EditProfile from './pages/EditProfile.tsx'
 
 const queryClient = new QueryClient()
 
@@ -22,6 +24,8 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/cars/:id" element={<CarDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile/:id" element={<Profile />} />
+          <Route path="/profile/edit" element={<EditProfile />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
