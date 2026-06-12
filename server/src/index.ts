@@ -8,6 +8,8 @@ import carRoutes from './routes/cars'
 import problemRoutes from './routes/problems'
 import solutionRoutes from './routes/solutions'
 import userRoutes from './routes/users'
+import searchRoutes from './routes/search'
+import notificationRoutes from './routes/notifications'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -24,6 +26,8 @@ app.use('/api/cars', carRoutes)
 app.use('/api/problems', problemRoutes)
 app.use('/api/solutions', solutionRoutes) 
 app.use('/api/users', userRoutes)
+app.use('/api/search', searchRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server in ascolto su http://localhost:${PORT}`)

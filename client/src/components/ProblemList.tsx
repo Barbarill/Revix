@@ -80,7 +80,8 @@ function ProblemCard({ problem, carId }: { problem: Problem; carId: string }) {
   })
 
   return (
-    <div style={{
+    // ← aggiunto id qui
+    <div id={`problem-${problem.id}`} style={{
       background: 'var(--color-background-primary)',
       border: '0.5px solid var(--color-border-tertiary)',
       borderRadius: 'var(--border-radius-lg)',

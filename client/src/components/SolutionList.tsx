@@ -68,11 +68,21 @@ export default function SolutionList({ problemId }: { problemId: string }) {
               {sol.body}
             </p>
             {sol.shop_url && (
-              <a href={sol.shop_url} target="_blank" rel="noopener noreferrer" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                fontSize: 12, color: 'var(--color-blue)', marginTop: 6,
-              }}>
-                🛒 Vedi ricambio ↗
+              <a
+                href={sol.shop_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  fontSize: 11, marginTop: 8,
+                  padding: '3px 10px', borderRadius: 20,
+                  background: 'var(--color-blue-light)',
+                  color: 'var(--color-blue)',
+                  border: '0.5px solid #B8D4F0',
+                  fontWeight: 500, textDecoration: 'none',
+                }}
+              >
+                🛒 Acquista ricambio ↗
               </a>
             )}
           </div>

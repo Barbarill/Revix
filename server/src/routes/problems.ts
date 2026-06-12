@@ -82,7 +82,12 @@ router.post('/:id/confirm', authMiddleware, async (req: AuthRequest, res: Respon
       return
     }
 
-    // Controlla se l'utente ha già confermato
+    // Non notificare se l'utente conferma il proprio problema
+    if (problem.user_id === userId) {
+      res.status(400).json({ error: 'Non puoi confermare il tuo stesso problema' })
+      return
+    }
+
     const existing = await prisma.confirm.findUnique({
       where: { user_id_problem_id: { user_id: userId, problem_id: problemId } },
     })
@@ -91,7 +96,11 @@ router.post('/:id/confirm', authMiddleware, async (req: AuthRequest, res: Respon
       return
     }
 
-    // Crea la conferma e aggiorna il contatore in una transazione
+    const confirmer = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true },
+    })
+
     const updatedProblem = await prisma.$transaction(async (tx) => {
       await tx.confirm.create({
         data: { user_id: userId, problem_id: problemId },
@@ -99,13 +108,25 @@ router.post('/:id/confirm', authMiddleware, async (req: AuthRequest, res: Respon
 
       const newCount = problem.confirm_count + 1
 
-      return tx.problem.update({
+      const updated = await tx.problem.update({
         where: { id: problemId },
         data: {
           confirm_count: newCount,
           is_official: newCount >= 5,
         },
       })
+
+      // Crea notifica per il proprietario del problema
+      await tx.notification.create({
+        data: {
+          user_id: problem.user_id,
+          sender_id: userId,
+          problem_id: problemId,
+          message: `${confirmer?.username ?? 'Un utente'} ha confermato il tuo problema: "${problem.title}"`,
+        },
+      })
+
+      return updated
     })
 
     res.json(updatedProblem)
