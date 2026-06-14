@@ -24,11 +24,17 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/cars', carRoutes)
 app.use('/api/problems', problemRoutes)
-app.use('/api/solutions', solutionRoutes) 
+app.use('/api/solutions', solutionRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/search', searchRoutes)
 app.use('/api/notifications', notificationRoutes)
 
-app.listen(PORT, () => {
-  console.log(`Server in ascolto su http://localhost:${PORT}`)
-})
+// Esporta app per i test (Supertest la usa senza avviare il server)
+export { app }
+
+// Avvia il server solo se eseguito direttamente (non quando importato dai test)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server in ascolto su http://localhost:${PORT}`)
+  })
+}
