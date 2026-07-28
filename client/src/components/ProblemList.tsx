@@ -10,6 +10,12 @@ const CATEGORY_ICONS: Record<string, string> = {
 const CATEGORY_LABELS: Record<string, string> = {
   MOTOR: 'Motore', ELECTRONICS: 'Elettronica', BRAKES: 'Freni', SUSPENSION: 'Sospensioni', BODYWORK: 'Carrozzeria',
 }
+// Aggiungi questa funzione helper in cima al file, dopo CATEGORY_STYLE
+function frequencyTag(confirmCount: number): { label: string; bg: string; color: string } {
+  if (confirmCount >= 50) return { label: 'Molto comune', bg: '#F1EFE8', color: '#5F5E5A' }
+  if (confirmCount >= 10) return { label: 'Comune',       bg: '#F1EFE8', color: '#5F5E5A' }
+  return                         { label: 'Raro',         bg: '#F1EFE8', color: '#5F5E5A' }
+}
 const CATEGORY_STYLE: Record<string, { bg: string; color: string }> = {
   MOTOR:       { bg: '#FAECE7', color: '#993C1D' },
   ELECTRONICS: { bg: '#E6F1FB', color: '#185FA5' },
@@ -99,10 +105,25 @@ function ProblemCard({ problem, carId }: { problem: Problem; carId: string }) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>{problem.title}</div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 20, background: catStyle.bg, color: catStyle.color }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: 11, padding: '1px 7px', borderRadius: 20,
+              background: catStyle.bg, color: catStyle.color,
+            }}>
               {CATEGORY_LABELS[problem.category]}
             </span>
+            {/* ← fix 2.9: tag frequenza */}
+            {(() => {
+              const freq = frequencyTag(problem.confirm_count)
+              return (
+                <span style={{
+                  fontSize: 11, padding: '2px 8px', borderRadius: 20,
+                  background: freq.bg, color: freq.color,
+                }}>
+                  {freq.label}
+                </span>
+              )
+            })()}
           </div>
         </div>
       </div>
@@ -123,7 +144,7 @@ function ProblemCard({ problem, carId }: { problem: Problem; carId: string }) {
             color: problem.confirmedByMe ? 'var(--color-green)' : 'var(--color-text-secondary)',
             opacity: isPending ? 0.6 : 1,
           }}>
-            {problem.confirmedByMe ? '✓ Confermato' : '+ Conferma anche tu'}
+            {problem.confirmedByMe ? '✓ Confermato da te' : '+ Conferma anche tu'}
           </button>
         )}
 

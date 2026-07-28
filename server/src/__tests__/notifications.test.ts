@@ -4,13 +4,26 @@ import jwt from 'jsonwebtoken'
 
 // ─── Mock Prisma ───────────────────────────────────────────────────────────────
 jest.mock('@prisma/client', () => {
-  const mockPrisma = {
+  const mockFindMany = jest.fn()
+  const mockUpdateMany = jest.fn()
+  const mockDisconnect = jest.fn().mockResolvedValue(undefined)
+
+  const MockPrismaClient = jest.fn(() => ({
     notification: {
-      findMany: jest.fn(),
-      updateMany: jest.fn(),
+      findMany: mockFindMany,
+      updateMany: mockUpdateMany,
     },
+    $disconnect: mockDisconnect,
+  }))
+
+  // Stesso pattern di search.test.ts — esponiamo i mock sul costruttore
+  ;(MockPrismaClient as any).__mocks = {
+    mockFindMany,
+    mockUpdateMany,
+    mockDisconnect,
   }
-  return { PrismaClient: jest.fn(() => mockPrisma) }
+
+  return { PrismaClient: MockPrismaClient }
 })
 
 jest.mock('@prisma/adapter-pg', () => ({
@@ -18,10 +31,12 @@ jest.mock('@prisma/adapter-pg', () => ({
 }))
 
 import { PrismaClient } from '@prisma/client'
-const mockPrisma = new PrismaClient() as jest.Mocked<any>
 
 process.env.JWT_SECRET = 'test_secret'
 process.env.DATABASE_URL = 'postgresql://test'
+
+// Recupera i mock esposti dal factory
+const { mockFindMany, mockUpdateMany } = (PrismaClient as any).__mocks
 
 beforeEach(() => jest.clearAllMocks())
 
@@ -45,7 +60,7 @@ const fakeNotification = {
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('GET /api/notifications', () => {
   it('NOTIF-01: restituisce 200 e notifiche utente con token valido', async () => {
-    mockPrisma.notification.findMany.mockResolvedValue([fakeNotification])
+    mockFindMany.mockResolvedValue([fakeNotification])
 
     const res = await request(app)
       .get('/api/notifications')
@@ -60,7 +75,7 @@ describe('GET /api/notifications', () => {
     const res = await request(app).get('/api/notifications')
 
     expect(res.status).toBe(401)
-    expect(mockPrisma.notification.findMany).not.toHaveBeenCalled()
+    expect(mockFindMany).not.toHaveBeenCalled()
   })
 })
 
@@ -69,7 +84,7 @@ describe('GET /api/notifications', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('PATCH /api/notifications/read-all', () => {
   it('NOTIF-03: restituisce 200 e segna tutte le notifiche come lette', async () => {
-    mockPrisma.notification.updateMany.mockResolvedValue({ count: 2 })
+    mockUpdateMany.mockResolvedValue({ count: 2 })
 
     const res = await request(app)
       .patch('/api/notifications/read-all')
@@ -77,7 +92,7 @@ describe('PATCH /api/notifications/read-all', () => {
 
     expect(res.status).toBe(200)
     expect(res.body).toEqual({ ok: true })
-    expect(mockPrisma.notification.updateMany).toHaveBeenCalledWith(
+    expect(mockUpdateMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({ user_id: 'user-123', is_read: false }),
         data: { is_read: true },

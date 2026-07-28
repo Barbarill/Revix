@@ -73,16 +73,14 @@ export default function SolutionList({ problemId }: { problemId: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 5,
-                  fontSize: 11, marginTop: 8,
-                  padding: '3px 10px', borderRadius: 20,
-                  background: 'var(--color-blue-light)',
-                  color: 'var(--color-blue)',
-                  border: '0.5px solid #B8D4F0',
-                  fontWeight: 500, textDecoration: 'none',
+                  display: 'inline',
+                  fontSize: 12,
+                  marginTop: 8,
+                  color: '#185FA5',
+                  textDecoration: 'none',
                 }}
               >
-                🛒 Acquista ricambio ↗
+                🛒 Ricambio su {new URL(sol.shop_url).hostname} ↗
               </a>
             )}
           </div>

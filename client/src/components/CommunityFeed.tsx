@@ -8,6 +8,7 @@ interface RecentProblem {
   confirm_count: number
   created_at: string
   category: string
+  car_id: string                                         // ← aggiunto
   car: { brand: string; model: string }
   user: { username: string; role: string }
 }
@@ -33,7 +34,6 @@ export default function CommunityFeed() {
   })
 
   if (isLoading) return null
-
   if (!problems || problems.length === 0) return null
 
   return (
@@ -42,9 +42,7 @@ export default function CommunityFeed() {
       borderTop: '0.5px solid var(--color-border-tertiary)',
       padding: '14px 20px',
     }}>
-      <div style={{
-        maxWidth: 800, margin: '0 auto',
-      }}>
+      <div style={{ maxWidth: 800, margin: '0 auto' }}>
         <div style={{
           fontSize: 13, fontWeight: 500, marginBottom: 10,
           display: 'flex', alignItems: 'center', gap: 6,
@@ -54,11 +52,15 @@ export default function CommunityFeed() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(3, 1fr)',              // ← fix 2.15: 3 colonne fisse
           gap: 8,
         }}>
-          {problems.slice(0, 6).map(p => (
-            <Link to={`/cars/${p.car ? '' : ''}`} key={p.id} style={{ textDecoration: 'none' }}>
+          {problems.slice(0, 3).map(p => (                   // ← slice(0,3) invece di (0,6)
+            <Link
+              to={`/cars/${p.car_id}#problem-${p.id}`}       // ← fix 2.14: link corretto
+              key={p.id}
+              style={{ textDecoration: 'none' }}
+            >
               <div style={{
                 background: 'var(--color-background-primary)',
                 border: '0.5px solid var(--color-border-tertiary)',
