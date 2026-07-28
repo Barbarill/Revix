@@ -8,6 +8,36 @@ const router = Router()
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
 const prisma = new PrismaClient({ adapter })
 
+// GET /api/users?role=MECHANIC&city=Roma
+router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
+  const { role, city } = req.query
+
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        ...(role && { role: role as 'USER' | 'MECHANIC' }),
+        ...(city && {
+          garage_address: { contains: city as string, mode: 'insensitive' },
+        }),
+      },
+      select: {
+        id: true, username: true, role: true, bio: true,
+        garage_name: true, garage_address: true,
+        maps_url: true, website: true, is_verified: true, created_at: true,
+        _count: { select: { solutions: true } },
+      },
+      orderBy: [
+        { is_verified: 'desc' },   // verificati prima
+        { created_at: 'asc' },
+      ],
+    })
+    res.json(users)
+  } catch (err) {
+    console.error('GET USERS ERROR:', err)
+    res.status(500).json({ error: 'Errore interno del server' })
+  }
+})
+
 // GET /api/users/:id
 router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {

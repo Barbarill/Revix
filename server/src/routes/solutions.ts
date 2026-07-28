@@ -14,6 +14,37 @@ const solutionSchema = z.object({
   shop_url: z.string().url().optional().or(z.literal('')),
 })
 
+// GET /api/solutions/parts?category=MOTOR
+router.get('/parts', async (req: AuthRequest, res: Response): Promise<void> => {
+  const { category } = req.query
+
+  try {
+    const solutions = await prisma.solution.findMany({
+      where: {
+        shop_url: { not: null },
+        ...(category && {
+          problem: { category: category as any },
+        }),
+      },
+      orderBy: { likes_count: 'desc' },
+      include: {
+        user: { select: { username: true, role: true } },
+        problem: {
+          select: {
+            title: true,
+            category: true,
+            car: { select: { brand: true, model: true } },
+          },
+        },
+      },
+    })
+    res.json(solutions)
+  } catch (err) {
+    console.error('GET PARTS ERROR:', err)
+    res.status(500).json({ error: 'Errore interno del server' })
+  }
+})
+
 // GET /api/solutions?problem_id=xxx&userId=yyy
 router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
   const { problem_id, userId } = req.query

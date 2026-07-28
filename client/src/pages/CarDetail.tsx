@@ -9,7 +9,7 @@ interface Car {
   id: string; brand: string; model: string
   year_from: number; year_to: number | null
   fuel: string; horsepower: number | null
-  _count: { problems: number }
+  _count: { problems: number; solutions: number; users: number }  // ← aggiornato
 }
 
 interface Problem {
@@ -21,6 +21,13 @@ interface Problem {
 }
 
 interface ProblemsResponse { official: Problem[]; pending: Problem[] }
+
+// ← fix 2.6: helper tag diffusione
+function diffusionTag(problemCount: number): { label: string } {
+  if (problemCount > 20) return { label: 'Molto diffusa' }
+  if (problemCount > 5)  return { label: 'Comune' }
+  return                        { label: 'Rara' }
+}
 
 export default function CarDetail() {
   const { id } = useParams()
@@ -45,6 +52,7 @@ export default function CarDetail() {
   if (!car) return <p style={{ padding: 20, color: 'var(--color-text-secondary)', fontSize: 13 }}>Auto non trovata.</p>
 
   const years = car.year_to ? `${car.year_from} – ${car.year_to}` : `${car.year_from} – oggi`
+  const tag = diffusionTag(car._count.problems)                   // ← fix 2.6
 
   return (
     <div>
@@ -68,9 +76,20 @@ export default function CarDetail() {
               <p style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
                 {years} · {car.fuel}{car.horsepower ? ` · ${car.horsepower} CV` : ''}
               </p>
+              {/* ← fix 2.6: tag diffusione */}
+              <span style={{
+                display: 'inline-block', marginTop: 4,
+                fontSize: 11, padding: '2px 8px', borderRadius: 20,
+                background: '#F1EFE8', color: '#5F5E5A',
+              }}>
+                {tag.label}
+              </span>
             </div>
+            {/* ← fix 2.5: stat Soluzioni e Utenti aggiunte */}
             <div style={{ display: 'flex', gap: 24 }}>
-              <Stat label="Problemi" value={String(car._count.problems)} />
+              <Stat label="Problemi"  value={String(car._count.problems)}  />
+              <Stat label="Soluzioni" value={String(car._count.solutions)} />
+              <Stat label="Utenti"    value={String(car._count.users)}     />
             </div>
           </div>
         </div>
@@ -78,7 +97,6 @@ export default function CarDetail() {
 
       {/* Contenuto */}
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '16px 20px' }}>
-        {/* Toolbar problemi */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <span style={{ fontSize: 14, fontWeight: 500 }}>Problemi segnalati</span>
           {user ? (

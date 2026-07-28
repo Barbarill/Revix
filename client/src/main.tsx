@@ -11,6 +11,9 @@ import CarDetail from './pages/CarDetail.tsx'
 import Navbar from './components/Navbar.tsx'
 import Profile from './pages/Profile.tsx'
 import EditProfile from './pages/EditProfile.tsx'
+import Officine from './pages/Officine.tsx' 
+import Ricambi from './pages/Ricambi.tsx'
+import Community from './pages/Community.tsx'
 
 const queryClient = new QueryClient()
 
@@ -26,6 +29,9 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/register" element={<Register />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/profile/edit" element={<EditProfile />} />
+          <Route path="/officine" element={<Officine />} />
+          <Route path="/ricambi" element={<Ricambi />} />
+          <Route path="/community" element={<Community />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

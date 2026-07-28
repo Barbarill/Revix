@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import SearchBar from './SearchBar'
 import api from '../services/api'
@@ -13,20 +13,27 @@ interface Notification {
   sender: { username: string; role: string }
 }
 
+const NAV_LINKS = [
+  { label: 'Catalogo',  to: '/' },
+  { label: 'Community', to: '/community' },
+  { label: 'Officine',  to: '/officine' },
+  { label: 'Ricambi',   to: '/ricambi' },
+]
+
 export default function Navbar() {
   const navigate = useNavigate()
+  const location = useLocation()                              // ← per link attivo
   const storedUser = localStorage.getItem('user')
   const user = storedUser ? JSON.parse(storedUser) : null
   const queryClient = useQueryClient()
   const [showNotifications, setShowNotifications] = useState(false)
   const bellRef = useRef<HTMLDivElement>(null)
 
-  // Fetch notifiche (solo se loggato)
   const { data: notifications } = useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => (await api.get('/notifications')).data,
     enabled: !!user,
-    refetchInterval: 30000, // aggiorna ogni 30 secondi
+    refetchInterval: 30000,
   })
 
   const unreadCount = notifications?.filter(n => !n.is_read).length ?? 0
@@ -36,7 +43,6 @@ export default function Navbar() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   })
 
-  // Chiude il dropdown cliccando fuori
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
@@ -67,25 +73,54 @@ export default function Navbar() {
       position: 'sticky', top: 0, zIndex: 100,
     }}>
       {/* Logo */}
-      <Link to="/" style={{ fontSize: 17, fontWeight: 500, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-        <span>🔧</span><span>Re<span style={{ color: 'var(--color-accent)' }}>vix</span></span>
+      <Link to="/" style={{
+        fontSize: 17, fontWeight: 500, color: 'var(--color-text-primary)',
+        display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+      }}>
+        <span>🔧</span>
+        <span>Re<span style={{ color: 'var(--color-accent)' }}>vix</span></span>
       </Link>
 
-      {/* SearchBar — centro */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '0 16px' }}>
-        <SearchBar />
+      {/* Nav-links ← fix 2.16 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+        {NAV_LINKS.map(link => {
+          const isActive = location.pathname === link.to
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              style={{
+                fontSize: 13, padding: '5px 10px',
+                color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                fontWeight: isActive ? 500 : 400,
+                textDecoration: 'none',
+                borderBottom: isActive ? '2px solid var(--color-accent)' : '2px solid transparent',
+                lineHeight: '20px',
+              }}
+            >
+              {link.label}
+            </Link>
+          )
+        })}
       </div>
 
-      {/* Destra */}
+      {/* SearchBar — spostata a destra dei nav-links, maxWidth 280px */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', padding: '0 8px' }}>
+        <div style={{ maxWidth: 280, width: '100%' }}>
+          <SearchBar />
+        </div>
+      </div>
+
+      {/* Destra — notifiche + utente */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
 
-        {/* Campanella notifiche */}
         {user && (
           <div ref={bellRef} style={{ position: 'relative' }}>
             <button
               onClick={openNotifications}
               style={{
-                position: 'relative', background: 'none', border: '0.5px solid var(--color-border-secondary)',
+                position: 'relative', background: 'none',
+                border: '0.5px solid var(--color-border-secondary)',
                 borderRadius: 'var(--border-radius-md)', padding: '5px 10px',
                 cursor: 'pointer', fontSize: 15, lineHeight: 1,
                 color: 'var(--color-text-primary)',
@@ -106,7 +141,6 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Dropdown notifiche */}
             {showNotifications && (
               <div style={{
                 position: 'absolute', top: 'calc(100% + 6px)', right: 0,
@@ -126,7 +160,6 @@ export default function Navbar() {
                 }}>
                   Notifiche
                 </div>
-
                 {!notifications || notifications.length === 0 ? (
                   <div style={{ padding: '16px 14px', fontSize: 13, color: 'var(--color-text-secondary)' }}>
                     Nessuna notifica

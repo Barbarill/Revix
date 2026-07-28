@@ -52,12 +52,20 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
   }
 })
 
-// GET /api/problems/recent
+// GET /api/problems/recent?category=MOTOR&sort=recent&official=true
 router.get('/recent', async (req: Request, res: Response): Promise<void> => {
+  const { category, sort, official } = req.query
+
   try {
     const problems = await prisma.problem.findMany({
-      take: 20,
-      orderBy: { created_at: 'desc' },
+      take: 50,
+      where: {
+        ...(category && { category: category as any }),
+        ...(official === 'true' && { is_official: true }),
+      },
+      orderBy: sort === 'confirms'
+        ? { confirm_count: 'desc' }
+        : { created_at: 'desc' },
       include: {
         car: { select: { brand: true, model: true } },
         user: { select: { username: true, role: true } },

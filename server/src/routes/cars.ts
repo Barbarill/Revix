@@ -41,13 +41,31 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
         _count: {
           select: { problems: true },
         },
+        problems: {
+          select: { user_id: true },                    // ← per calcolare utenti unici
+        },
       },
     })
     if (!car) {
       res.status(404).json({ error: 'Auto non trovata' })
       return
     }
-    res.json(car)
+
+    // Calcola utenti unici e soluzioni
+    const uniqueUsers = new Set(car.problems.map(p => p.user_id)).size
+    const solutionsCount = await prisma.solution.count({
+      where: { problem: { car_id: String(req.params.id) } },
+    })
+
+    res.json({
+      ...car,
+      problems: undefined,                             // ← non esporre la lista raw
+      _count: {
+        problems: car._count.problems,
+        solutions: solutionsCount,
+        users: uniqueUsers,
+      },
+    })
   } catch (err) {
     console.error('CAR DETAIL ERROR:', err)
     res.status(500).json({ error: 'Errore interno del server' })
