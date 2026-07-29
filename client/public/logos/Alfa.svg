@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%">
+  <defs>
+    <!-- Gradienti per i dettagli del logo -->
+    <radialGradient id="blueRing" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="#002B66" />
+      <stop offset="100%" stop-color="#001533" />
+    </radialGradient>
+
+    <radialGradient id="skyBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="70%" stop-color="#87CEEB" />
+      <stop offset="100%" stop-color="#4682B4" />
+    </radialGradient>
+  </defs>
+
+  <!-- Bordo Oro Esterno -->
+  <circle cx="300" cy="300" r="290" fill="#DAA520" stroke="#B8860B" stroke-width="4" />
+  
+  <!-- Anello Blu Scuro Interno -->
+  <circle cx="300" cy="300" r="275" fill="url(#blueRing)" />
+  
+  <!-- Anello Oro Separatore -->
+  <circle cx="300" cy="300" r="185" fill="#DAA520" />
+
+  <!-- Scritta ALFA ROMEO -->
+  <path id="textArc" d="M 90,300 A 210,210 0 1,1 510,300" fill="none" />
+  <text font-family="'Arial Black', sans-serif" font-weight="bold" font-size="44" fill="#DAA520" letter-spacing="8">
+    <textPath href="#textArc" startOffset="50%" text-anchor="middle">
+      ALFA ROMEO
+    </textPath>
+  </text>
+
+  <!-- Disco Centrale Diviso -->
+  <g transform="translate(120, 120)">
+    <clipPath id="innerCircle">
+      <circle cx="180" cy="180" r="170" />
+    </clipPath>
+
+    <g clip-path="url(#innerCircle)">
+      <!-- Sfondo Sinistro e Destro -->
+      <rect x="0" y="0" width="180" height="360" fill="url(#skyBg)" />
+      <rect x="180" y="0" width="180" height="360" fill="url(#skyBg)" />
+
+      <!-- Croce Rossa (Sinistra) -->
+      <rect x="75" y="10" width="30" height="340" fill="#D6001C" />
+      <rect x="10" y="145" width="160" height="30" fill="#D6001C" />
+
+      <!-- Linea Divisoria Oro Centrale -->
+      <line x1="180" y1="0" x2="180" y2="360" stroke="#DAA520" stroke-width="4" />
+
+      <!-- Biscione / Serpente (Destra) -->
+      <!-- Corona -->
+      <path d="M 240,45 L 250,30 L 260,45 L 270,30 L 280,45 Z" fill="#DAA520" />
+      <rect x="240" y="45" width="40" height="6" fill="#DAA520" />
+      
+      <!-- Corpo Ondulato del Serpente -->
+      <path d="M 260,55 
+               C 310,55 310,95 260,95 
+               C 210,95 210,135 260,135 
+               C 310,135 310,175 260,175 
+               C 210,175 210,215 260,215 
+               C 310,215 310,255 260,255 
+               C 230,255 220,280 250,300" 
+            fill="none" stroke="#008040" stroke-width="26" stroke-linecap="round" />
+
+      <!-- Uomo rosso che esce dalla bocca -->
+      <path d="M 285,65 Q 305,65 300,75 Q 290,85 280,75 Z" fill="#D6001C" />
+      <circle cx="305" cy="70" r="5" fill="#D6001C" />
+    </g>
+  </g>
+</svg>

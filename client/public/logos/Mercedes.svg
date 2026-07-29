@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Sfumatura per l'anello esterno -->
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E6E6E6" />
+      <stop offset="50%" stop-color="#7F7F7F" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+    
+    <!-- Sfumature per la stella a 3 punte -->
+    <linearGradient id="starLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#B0B0B0" />
+    </linearGradient>
+    <linearGradient id="starDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#555555" />
+      <stop offset="100%" stop-color="#1A1A1A" />
+    </linearGradient>
+  </defs>
+
+  <!-- Anello esterno -->
+  <circle cx="250" cy="250" r="230" fill="none" stroke="url(#ringGrad)" stroke-width="16" />
+  <circle cx="250" cy="250" r="218" fill="none" stroke="#333333" stroke-width="2" />
+  <circle cx="250" cy="250" r="242" fill="none" stroke="#CCCCCC" stroke-width="2" />
+
+  <!-- Stella a 3 Punte -->
+  <g>
+    <!-- Punta Superiore -->
+    <polygon points="250,250 250,30 235,230" fill="url(#starDark)" />
+    <polygon points="250,250 250,30 265,230" fill="url(#starLight)" />
+
+    <!-- Punta Inferiore Destra -->
+    <polygon points="250,250 440,360 260,260" fill="url(#starDark)" />
+    <polygon points="250,250 440,360 380,225" fill="url(#starLight)" />
+
+    <!-- Punta Inferiore Sinistra -->
+    <polygon points="250,250 60,360 120,225" fill="url(#starDark)" />
+    <polygon points="250,250 60,360 240,260" fill="url(#starLight)" />
+  </g>
+</svg>
