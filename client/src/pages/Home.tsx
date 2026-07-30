@@ -17,14 +17,13 @@ interface Car {
 
 const TABS = ['Tutti', 'Motore', 'Carrozzeria', 'Elettronica', 'Soluzioni']
 
-const FILTER_TIPOLOGIA = [
-  { label: 'Motore',      count: 34 },
-  { label: 'Carrozzeria', count: 21 },
-  { label: 'Elettronica', count: 15 },
-  { label: 'Freni',       count: 9  },
+const FUEL_OPTIONS = ['Benzina', 'Diesel', 'Ibrido', 'Elettrico']
+const ANNO_OPTIONS = [
+  { label: 'Prima del 2010', min: 0,    max: 2009 },
+  { label: '2010–2014',      min: 2010, max: 2014 },
+  { label: '2015–2019',      min: 2015, max: 2019 },
+  { label: '2020 e oltre',   min: 2020, max: 9999 },
 ]
-const FILTER_FREQUENZA = ['Molto comune', 'Comune', 'Raro']
-const FILTER_ANNO      = ['2015–2018', '2019–2022', '2023+']
 
 const BRAND_LOGO: Record<string, { svg: string; hex: string } | undefined> = {
   'Fiat':       (si as any).siFiat,
@@ -50,11 +49,9 @@ const LOCAL_LOGOS: Record<string, string> = {
   'Lancia':     '/logos/logo_lancia.svg',
   'Alfa Romeo': '/logos/Alfa.svg',
   'Mercedes':   '/logos/Mercedes.svg',
-  // aggiungi qui altri se ne trovi altri che non funzionano
 }
 
 function BrandLogo({ brand, size = 28 }: { brand: string; size?: number }) {
-  // 1. Prima controlla se c'è un file locale
   if (LOCAL_LOGOS[brand]) return (
     <img
       src={LOCAL_LOGOS[brand]}
@@ -63,8 +60,6 @@ function BrandLogo({ brand, size = 28 }: { brand: string; size?: number }) {
       onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
     />
   )
-
-  // 2. Poi prova simple-icons
   const logo = BRAND_LOGO[brand]
   if (!logo) return <span style={{ fontSize: 18 }}>🚗</span>
   return (
@@ -84,15 +79,35 @@ const BRANDS_ORDER = [
   'Dacia', 'Jeep', 'Seat', 'Skoda',
 ]
 
-const BRANDS_INITIAL = 8  // marche visibili prima di "Mostra tutte"
+const BRANDS_INITIAL = 8
 
-function FilterSidebar() {
-  const [tipologia, setTipologia] = useState<string[]>([])
-  const [frequenza, setFrequenza] = useState<string[]>([])
-  const [anno,      setAnno]      = useState<string[]>([])
+interface FilterState {
+  fuels: string[]
+  anni: string[]
+}
 
-  const toggle = (list: string[], setList: (v: string[]) => void, val: string) =>
-    setList(list.includes(val) ? list.filter(v => v !== val) : [...list, val])
+interface FilterSidebarProps {
+  filters: FilterState
+  onChange: (f: FilterState) => void
+  counts: { fuels: Record<string, number>; anni: Record<string, number> }
+}
+
+function FilterSidebar({ filters, onChange, counts }: FilterSidebarProps) {
+  const toggleFuel = (val: string) => {
+    const fuels = filters.fuels.includes(val)
+      ? filters.fuels.filter(v => v !== val)
+      : [...filters.fuels, val]
+    onChange({ ...filters, fuels })
+  }
+
+  const toggleAnno = (val: string) => {
+    const anni = filters.anni.includes(val)
+      ? filters.anni.filter(v => v !== val)
+      : [...filters.anni, val]
+    onChange({ ...filters, anni })
+  }
+
+  const hasFilters = filters.fuels.length > 0 || filters.anni.length > 0
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div style={{ marginBottom: 20 }}>
@@ -124,25 +139,37 @@ function FilterSidebar() {
       padding: '14px 16px', alignSelf: 'start',
       position: 'sticky', top: 60,
     }}>
-      <Section title="Tipologia">
-        {FILTER_TIPOLOGIA.map(f => (
-          <CheckRow key={f.label} label={f.label} count={f.count}
-            checked={tipologia.includes(f.label)}
-            onChange={() => toggle(tipologia, setTipologia, f.label)} />
+      {hasFilters && (
+        <button
+          onClick={() => onChange({ fuels: [], anni: [] })}
+          style={{
+            fontSize: 11, color: 'var(--color-accent)', background: 'none',
+            border: 'none', cursor: 'pointer', padding: 0, marginBottom: 14,
+          }}
+        >
+          ✕ Azzera filtri
+        </button>
+      )}
+
+      <Section title="Carburante">
+        {FUEL_OPTIONS.map(f => (
+          <CheckRow
+            key={f} label={f}
+            count={counts.fuels[f] ?? 0}
+            checked={filters.fuels.includes(f)}
+            onChange={() => toggleFuel(f)}
+          />
         ))}
       </Section>
-      <Section title="Frequenza">
-        {FILTER_FREQUENZA.map(f => (
-          <CheckRow key={f} label={f}
-            checked={frequenza.includes(f)}
-            onChange={() => toggle(frequenza, setFrequenza, f)} />
-        ))}
-      </Section>
+
       <Section title="Anno veicolo">
-        {FILTER_ANNO.map(f => (
-          <CheckRow key={f} label={f}
-            checked={anno.includes(f)}
-            onChange={() => toggle(anno, setAnno, f)} />
+        {ANNO_OPTIONS.map(a => (
+          <CheckRow
+            key={a.label} label={a.label}
+            count={counts.anni[a.label] ?? 0}
+            checked={filters.anni.includes(a.label)}
+            onChange={() => toggleAnno(a.label)}
+          />
         ))}
       </Section>
     </div>
@@ -150,34 +177,56 @@ function FilterSidebar() {
 }
 
 export default function Home() {
-  const [brand,        setBrand]        = useState('')
-  const [model,        setModel]        = useState('')
-  const [year,         setYear]         = useState('')
-  const [activeTab,    setActiveTab]    = useState('Tutti')
+  const [brand,         setBrand]         = useState('')
+  const [model,         setModel]         = useState('')
+  const [year,          setYear]          = useState('')
+  const [activeTab,     setActiveTab]     = useState('Tutti')
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [showAllBrands, setShowAllBrands] = useState(false)
-  const [params,       setParams]       = useState<Record<string, string>>({})
+  const [params,        setParams]        = useState<Record<string, string>>({})
+  const [filters,       setFilters]       = useState<FilterState>({ fuels: [], anni: [] })
 
   const years = Array.from({ length: 25 }, (_, i) => String(2024 - i))
 
-  // Carica tutte le auto (usato per ricerca e per estrarre marche)
   const { data: allCars, isLoading } = useQuery<Car[]>({
     queryKey: ['cars', params],
     queryFn: async () => (await api.get('/cars', { params })).data,
   })
 
-  // Marche presenti nel DB, ordinate secondo BRANDS_ORDER
-  const brandsInDb = BRANDS_ORDER.filter(b =>
-    allCars?.some(c => c.brand === b)
-  )
+  const brandsInDb = BRANDS_ORDER.filter(b => allCars?.some(c => c.brand === b))
   const visibleBrands = showAllBrands ? brandsInDb : brandsInDb.slice(0, BRANDS_INITIAL)
 
-  // Auto filtrate per marca selezionata
-  const filteredCars = selectedBrand
+  // Base cars per conteggi (senza filtri sidebar)
+  const baseCars = selectedBrand
     ? allCars?.filter(c => c.brand === selectedBrand) ?? []
     : allCars ?? []
 
-  // Raggruppamento per modello quando è selezionata una marca
+  // Cars filtrate per marca + filtri sidebar
+  const filteredCars = baseCars.filter(car => {
+    if (filters.fuels.length > 0 && !filters.fuels.includes(car.fuel)) return false
+    if (filters.anni.length > 0) {
+      const match = ANNO_OPTIONS
+        .filter(a => filters.anni.includes(a.label))
+        .some(a => car.year_from <= a.max && (car.year_to ?? 9999) >= a.min)
+      if (!match) return false
+    }
+    return true
+  })
+
+  // Conteggi badge sidebar
+  const fuelCounts = FUEL_OPTIONS.reduce<Record<string, number>>((acc, f) => {
+    acc[f] = baseCars.filter(c => c.fuel === f).length
+    return acc
+  }, {})
+
+  const annoCounts = ANNO_OPTIONS.reduce<Record<string, number>>((acc, a) => {
+    acc[a.label] = baseCars.filter(c =>
+      c.year_from <= a.max && (c.year_to ?? 9999) >= a.min
+    ).length
+    return acc
+  }, {})
+
+  // Raggruppamento per modello quando marca selezionata
   const groupedByModel = selectedBrand
     ? filteredCars.reduce<Record<string, Car[]>>((acc, car) => {
         if (!acc[car.model]) acc[car.model] = []
@@ -194,10 +243,12 @@ export default function Home() {
     if (year)         p.year  = year
     setParams(p)
     setSelectedBrand(null)
+    setFilters({ fuels: [], anni: [] })
   }
 
   const handleBrandClick = (b: string) => {
     setSelectedBrand(prev => prev === b ? null : b)
+    setFilters({ fuels: [], anni: [] })
   }
 
   return (
@@ -279,61 +330,76 @@ export default function Home() {
       {/* Layout 2 colonne */}
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '16px 20px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20 }}>
-          <FilterSidebar />
+
+          {/* Sidebar con filtri reali */}
+          <FilterSidebar
+            filters={filters}
+            onChange={setFilters}
+            counts={{ fuels: fuelCounts, anni: annoCounts }}
+          />
 
           {/* Colonna destra */}
           <div>
             {isLoading && <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Caricamento...</p>}
 
-            {!isLoading && !selectedBrand && Object.keys(params).length === 0 && (
-              <>
-                {/* Griglia marche */}
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Sfoglia per marca
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                    {visibleBrands.map(b => (
-                      <button
-                        key={b}
-                        onClick={() => handleBrandClick(b)}
-                        style={{
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                          padding: '10px 8px',
-                          background: selectedBrand === b ? 'var(--color-background-secondary)' : 'var(--color-background-primary)',
-                          border: `0.5px solid ${selectedBrand === b ? 'var(--color-accent)' : 'var(--color-border-tertiary)'}`,
-                          borderRadius: 'var(--border-radius-lg)',
-                          cursor: 'pointer',
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-border-secondary)')}
-                        onMouseLeave={e => (e.currentTarget.style.borderColor = selectedBrand === b ? 'var(--color-accent)' : 'var(--color-border-tertiary)')}
-                      >
-                        <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <BrandLogo brand={b} size={30} />
-                        </div>
-                        <span style={{ fontSize: 11, color: 'var(--color-text-primary)', fontWeight: 500 }}>{b}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Mostra tutte / meno */}
-                  {brandsInDb.length > BRANDS_INITIAL && (
-                    <button
-                      onClick={() => setShowAllBrands(v => !v)}
-                      style={{
-                        marginTop: 10, fontSize: 12,
-                        color: 'var(--color-accent)', background: 'none',
-                        border: 'none', cursor: 'pointer', padding: 0,
-                      }}
-                    >
-                      {showAllBrands ? '↑ Mostra meno' : `↓ Mostra tutte le marche (${brandsInDb.length})`}
-                    </button>
-                  )}
+            {/* Griglia marche — solo se nessun filtro attivo e nessuna ricerca */}
+            {!isLoading && !selectedBrand && Object.keys(params).length === 0 && filters.fuels.length === 0 && filters.anni.length === 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Sfoglia per marca
                 </div>
-              </>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {visibleBrands.map(b => (
+                    <button
+                      key={b}
+                      onClick={() => handleBrandClick(b)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                        padding: '10px 8px',
+                        background: selectedBrand === b ? 'var(--color-background-secondary)' : 'var(--color-background-primary)',
+                        border: `0.5px solid ${selectedBrand === b ? 'var(--color-accent)' : 'var(--color-border-tertiary)'}`,
+                        borderRadius: 'var(--border-radius-lg)',
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-border-secondary)')}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = selectedBrand === b ? 'var(--color-accent)' : 'var(--color-border-tertiary)')}
+                    >
+                      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <BrandLogo brand={b} size={30} />
+                      </div>
+                      <span style={{ fontSize: 11, color: 'var(--color-text-primary)', fontWeight: 500 }}>{b}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {brandsInDb.length > BRANDS_INITIAL && (
+                  <button
+                    onClick={() => setShowAllBrands(v => !v)}
+                    style={{
+                      marginTop: 10, fontSize: 12,
+                      color: 'var(--color-accent)', background: 'none',
+                      border: 'none', cursor: 'pointer', padding: 0,
+                    }}
+                  >
+                    {showAllBrands ? '↑ Mostra meno' : `↓ Mostra tutte le marche (${brandsInDb.length})`}
+                  </button>
+                )}
+              </div>
             )}
 
-            {/* Lista modelli — quando marca selezionata o ricerca attiva */}
+            {/* Lista filtrata per sidebar — filtri attivi senza marca selezionata */}
+            {!isLoading && !selectedBrand && Object.keys(params).length === 0 && (filters.fuels.length > 0 || filters.anni.length > 0) && (
+              <div>
+                {filteredCars.length === 0
+                  ? <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Nessuna auto trovata con questi filtri.</p>
+                  : <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {filteredCars.map(car => <CarCard key={car.id} car={car} />)}
+                    </div>
+                }
+              </div>
+            )}
+
+            {/* Lista modelli — marca selezionata o ricerca attiva */}
             {(selectedBrand || Object.keys(params).length > 0) && (
               <div>
                 {selectedBrand && (
@@ -354,7 +420,6 @@ export default function Home() {
                   <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>Nessuna auto trovata.</p>
                 )}
 
-                {/* Raggruppato per modello se marca selezionata */}
                 {groupedByModel
                   ? Object.entries(groupedByModel).map(([modelName, versions]) => (
                       <div key={modelName} style={{ marginBottom: 16 }}>
